@@ -3,11 +3,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import DrawerNavigator from './drawer-navigator';
 import Modal from '../screens/modal';
+import viewUser from '../screens/viewUser';
 
 export type RootStackParamList = {
   DrawerNavigator: undefined;
   Modal: undefined;
   TabNavigator: undefined;
+  ViewUser: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -26,6 +28,11 @@ export default function RootStack() {
           component={Modal}
           options={{ presentation: 'modal', headerLeft: () => null }}
         />
+        <Stack.Screen
+          name="ViewUser"
+          component={viewUser}
+          options={{headerShown: false}}
+          />
       </Stack.Navigator>
     </NavigationContainer>
   );
