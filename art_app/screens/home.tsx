@@ -1,7 +1,6 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useState, useContext } from 'react';
 import Toast from 'react-native-toast-message';
-import { UserContext }  from '../components/UserProvider';
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, useWindowDimensions, Modal, Button } from 'react-native';
 
 // Define the interface for the example item type
