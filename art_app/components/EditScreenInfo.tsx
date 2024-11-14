@@ -1,6 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { UserContext } from 'components/UserInfo';
+import React, { useContext } from 'react';
 
 export default function EditScreenInfo({ path }: { path: string }) {
+  const { email } = useContext(UserContext);
   const title = 'Open up the code for this screen:';
   const description =
     'Change any of the text, save the file, and your app will automatically update.';
@@ -8,6 +11,7 @@ export default function EditScreenInfo({ path }: { path: string }) {
   return (
     <View style={styles.getStartedContainer}>
       <Text style={styles.getStartedText}>{title}</Text>
+      <Text>Hello, {email}</Text>
       <View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
         <Text>{path}</Text>
       </View>
