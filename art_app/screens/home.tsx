@@ -1,7 +1,9 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useState, useContext } from 'react';
 import Toast from 'react-native-toast-message';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, useWindowDimensions, Modal, Button } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UserContext } from 'components/UserInfo';
+import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, useWindowDimensions, Modal, Button, Platform } from 'react-native';
 
 // Define the interface for the example item type
 interface Item {
@@ -54,7 +56,7 @@ const itemData: Item[] = [
 ];
 
 const Home = ({ navigation }) => {
-  // const { userId, username, ViewUser} = useContext(UserContext);
+  const { email, setEmail, setUsername } = useContext(UserContext);
   const { width } = useWindowDimensions();
   const [modalVisible, setModalVisible] = useState(false);
   const numColumns = width > 768 ? 3 : 1;
@@ -88,8 +90,36 @@ const Home = ({ navigation }) => {
     navigation.navigate('ViewUser');
   };
 
+  const handleUploadScreen = () => {
+    if (Platform.OS === 'web') {
+      navigation.navigate('WebImageUpload');
+    } else {
+      navigation.navigate('AppImageUpload');
+    }
+  }
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('userToken');
+    setEmail('');
+    setUsername('');
+    
+    if (Platform.OS === 'web') {
+        localStorage.removeItem('userToken'); // Clear token from localStorage
+        navigation.navigate('WebSplashScreen');
+    } else {
+        navigation.navigate('SplashScreen');
+    }
+};
+
   return (
     <View style={styles.container}>
+      <View style={styles.container}>
+        <Text>Welcome to the home screen!</Text>
+        <Text>Email: {email}</Text>
+        <Button title="Logout" onPress={handleLogout} />
+        <Button title="upload" onPress={handleUploadScreen} />
+      </View>
+
 
       {itemData.length > 0 ? (
         <FlatList
@@ -118,7 +148,7 @@ const Home = ({ navigation }) => {
 
             </View>
           </View>
-        </Modal>
+      </Modal>
 
       <Toast/>
     </View>
