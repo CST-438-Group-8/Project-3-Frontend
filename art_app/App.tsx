@@ -1,9 +1,16 @@
 import 'react-native-gesture-handler';
+import { UserInfo } from 'components/UserInfo';
 
 import RootStack from './navigation';
-import { SignUpScreen } from 'components/SignUpScreenContent';
-import WebImageUpload from 'components/WebImageUpload';
-import AppImageUpload from 'components/AppImageUpload';
+
 export default function App() {
-  return <AppImageUpload />;
+// <<<<<<< HEAD
+  return (
+    <UserInfo>
+      <RootStack />
+    </UserInfo>
+  );
+// =======
+//   return <AppImageUpload />;
+// >>>>>>> main
 }

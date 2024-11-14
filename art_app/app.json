@@ -3,35 +3,47 @@
     "name": "art_app",
     "slug": "art_app",
     "version": "1.0.0",
-
     "web": {
       "favicon": "./assets/favicon.png"
     },
-
     "experiments": {
       "tsconfigPaths": true
     },
-
-    "plugins": [],
-
+    "plugins": [
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.763302642477-dh5ocljskbjomeb5jlouo5jeq87qlv80",
+          "clientId": "763302642477-t7v8ppah1lfcbkfu4kmdj59fv06aig0t.apps.googleusercontent.com",
+          "androidClientId": "763302642477-2i0f9s1o4882a9tj1b4e3v7ng7cvvojs.apps.googleusercontent.com"
+        }
+      ]
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-
     "userInterfaceStyle": "light",
-
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alvarodlc.artapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.alvarodlc.artapp"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ef70e4ac-4bce-47b5-92cb-a2206c40e216"
       }
     }
   }
