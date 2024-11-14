@@ -5,6 +5,9 @@ import DrawerNavigator from './drawer-navigator';
 import Modal from '../screens/modal';
 import SplashScreen from '../screens/SplashScreen';
 import WebSplashScreen from '../screens/WebSplashScreen';
+import { SignUpScreen } from 'components/SignUpScreenContent';
+import WebImageUpload from 'components/WebImageUpload';
+import AppImageUpload from 'components/AppImageUpload';
 
 export type RootStackParamList = {
   DrawerNavigator: undefined;
@@ -12,6 +15,8 @@ export type RootStackParamList = {
   TabNavigator: undefined;
   SplashScreen: undefined;
   WebSplashScreen: undefined;
+  WebImageUpload: undefined;
+  AppImageUpload: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -28,6 +33,16 @@ export default function RootStack() {
         <Stack.Screen
           name="WebSplashScreen"
           component={WebSplashScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="WebImageUpload"
+          component={WebImageUpload}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AppImageUpload"
+          component={AppImageUpload}
           options={{ headerShown: false }}
         />
         <Stack.Screen

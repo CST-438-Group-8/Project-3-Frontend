@@ -6,6 +6,13 @@ import { UserContext } from 'components/UserInfo';
 export default function HomeScreen({ navigation }) {
     const { email, setEmail, setUsername } = useContext(UserContext);
     
+    const handleUploadScreen = () => {
+      if (Platform.OS === 'web') {
+        navigation.navigate('WebImageUpload');
+      } else {
+        navigation.navigate('AppImageUpload');
+      }
+    }
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem('userToken');
@@ -25,6 +32,8 @@ export default function HomeScreen({ navigation }) {
             <Text>Welcome to the home screen!</Text>
             <Text>Email: {email}</Text>
             <Button title="Logout" onPress={handleLogout} />
+
+            <Button title="upload" onPress={handleUploadScreen} />
         </View>
     );
 }
