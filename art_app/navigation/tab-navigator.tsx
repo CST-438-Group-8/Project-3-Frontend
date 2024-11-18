@@ -1,4 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
 import { RootStackParamList } from '.';
@@ -23,8 +24,8 @@ export default function TabLayout({ navigation }: Props) {
         name="One"
         component={One}
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <Ionicons name="person" color={color} />,
           headerRight: () => <HeaderButton onPress={() => navigation.navigate('Modal')} />,
         }}
       />
@@ -32,8 +33,8 @@ export default function TabLayout({ navigation }: Props) {
         name="Two"
         component={Two}
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Settings',
+          tabBarIcon: ({ color }) => <Ionicons name="settings" color={color} />,
         }}
       />
     </Tab.Navigator>

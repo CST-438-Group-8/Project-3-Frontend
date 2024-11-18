@@ -3,20 +3,23 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Platform } from 'react-native';
 import DrawerNavigator from './drawer-navigator';
 import Modal from '../screens/modal';
+import viewUser from '../screens/viewUser';
 import SplashScreen from '../screens/SplashScreen';
 import WebSplashScreen from '../screens/WebSplashScreen';
-import { SignUpScreen } from 'components/SignUpScreenContent';
-import WebImageUpload from 'components/WebImageUpload';
-import AppImageUpload from 'components/AppImageUpload';
+import { SignUpScreen } from '../screens/SignUpScreenContent';
+import WebImageUpload from '../screens/WebImageUpload';
+import AppImageUpload from '../screens/AppImageUpload';
 
 export type RootStackParamList = {
   DrawerNavigator: undefined;
   Modal: undefined;
   TabNavigator: undefined;
+  ViewUser: undefined;
   SplashScreen: undefined;
   WebSplashScreen: undefined;
   WebImageUpload: undefined;
   AppImageUpload: undefined;
+  SignUpScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -54,6 +57,16 @@ export default function RootStack() {
           name="Modal"
           component={Modal}
           options={{ presentation: 'modal', headerLeft: () => null }}
+        />
+        <Stack.Screen
+          name="ViewUser"
+          component={viewUser}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="SignUpScreen"
+          component={SignUpScreen}
+          options={{headerShown: false}}
         />
       </Stack.Navigator>
     </NavigationContainer>
