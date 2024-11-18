@@ -6,9 +6,9 @@ import Modal from '../screens/modal';
 import viewUser from '../screens/viewUser';
 import SplashScreen from '../screens/SplashScreen';
 import WebSplashScreen from '../screens/WebSplashScreen';
-import { SignUpScreen } from 'components/SignUpScreenContent';
-import WebImageUpload from 'components/WebImageUpload';
-import AppImageUpload from 'components/AppImageUpload';
+import { SignUpScreen } from '../screens/SignUpScreenContent';
+import WebImageUpload from '../screens/WebImageUpload';
+import AppImageUpload from '../screens/AppImageUpload';
 
 export type RootStackParamList = {
   DrawerNavigator: undefined;
@@ -19,6 +19,7 @@ export type RootStackParamList = {
   WebSplashScreen: undefined;
   WebImageUpload: undefined;
   AppImageUpload: undefined;
+  SignUpScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -61,7 +62,12 @@ export default function RootStack() {
           name="ViewUser"
           component={viewUser}
           options={{headerShown: false}}
-          />
+        />
+        <Stack.Screen
+          name="SignUpScreen"
+          component={SignUpScreen}
+          options={{headerShown: false}}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
