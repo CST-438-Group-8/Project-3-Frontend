@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { UserContext } from 'components/UserInfo';
+import { UserContext } from '../components/UserInfo';
 import React, { useContext } from 'react';
 
 export default function EditScreenInfo({ path }: { path: string }) {

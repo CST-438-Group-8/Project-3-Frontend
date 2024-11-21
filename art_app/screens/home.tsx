@@ -1,7 +1,7 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useState, useContext, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
-import { UserContext } from 'components/UserInfo';
+import { UserContext } from '../components/UserInfo';
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, useWindowDimensions, Dimensions, Modal, Button, Platform } from 'react-native';
 import { theme } from '../components/theme';
 import { handleUploadScreen, handleLogout, viewUserProfile } from '../components/NavigationFunctions';
@@ -114,13 +114,6 @@ const Home = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.container}>
-        <Text>Welcome to the home screen!</Text>
-        <Text>Email: {email}</Text>
-        <Button title="Logout" onPress={() => handleLogout(AsyncStorage, setEmail, setUsername, Platform, navigation)} />
-        <Button title="upload" onPress={() => handleUploadScreen(Platform ,navigation)} />
-      </View> */}
-
       <View style={styles.container}>
         {itemData.length > 0 ? (
           <FlatList

@@ -27,7 +27,7 @@ export default function DrawerNavigator({ navigation }: Props) {
         name="Profile"
         component={TabNavigator}
         options={{
-          headerRight: () => <HeaderButton onPress={() => navigation.navigate('Modal')} />,
+          // headerRight: () => <HeaderButton onPress={() => navigation.navigate('Modal')} />,
           drawerIcon: ({ size, color }) => (
             <Ionicons name="person" size={size} color={color} />
           ),

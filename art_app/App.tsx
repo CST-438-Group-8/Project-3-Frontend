@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import { UserInfo } from 'components/UserInfo';
+import { UserInfo } from './components/UserInfo';
 import { ThemeProvider } from 'styled-components';
 import { theme } from './components/theme';
 

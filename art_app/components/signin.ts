@@ -1,5 +1,5 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import { UserContext } from 'components/UserInfo';
+import { UserContext } from '../components/UserInfo';
 import React, { useContext, useState } from 'react';
 
 export const signIn = async (setEmail, navigation) => {
@@ -9,7 +9,7 @@ export const signIn = async (setEmail, navigation) => {
         if (response.data?.user.email) {
             setEmail(response.data?.user.email);
             console.log(response.data?.user.email);
-            navigation.navigate('DrawerNavigator', { screen: 'Home'});
+            navigation.navigate('SignUpScreen');
         } else {
         console.error("Sign in was cancelled by user");
         }
