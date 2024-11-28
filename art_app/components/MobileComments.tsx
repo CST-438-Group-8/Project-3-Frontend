@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, GestureResponderEvent } from 'react-native';
-import { theme } from '../components/theme';
+import React, { useState, useEffect } from 'react';
+import { Modal, View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, GestureResponderEvent, ActivityIndicator } from 'react-native';
 
 interface MobileCommentsProps {
     visible: boolean;
     onClose: (event?: GestureResponderEvent) => void;
     caption: string;
+    postUser: string;
     comments: string[];
     onAddComment: (comment: string) => Promise<void>;
+    onLoadComments: () => Promise<void>;
 }
 
-const MobileComments: React.FC<MobileCommentsProps> = ({ visible, onClose, postUser, caption, comments, onAddComment }) => {
+const sampleImage = 'https://media.istockphoto.com/id/1222357475/vector/image-preview-icon-picture-placeholder-for-website-or-ui-ux-design-vector-illustration.jpg?s=2048x2048&w=is&k=20&c=CJLIU6nIISsrHLTVO04nxIH2zVaKbnUeUXp7PnpM2h4=';
+
+const MobileComments: React.FC<MobileCommentsProps> = ({ visible, onClose, postUser, caption, comments, onAddComment, onLoadComments }) => {
     const [newComment, setNewComment] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [load, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (visible) {
+            try {
+                onLoadComments();
+            } catch(error) {
+                console.error('Error loading comments:', error);
+            } finally {
+                setLoading(false)
+            }
+        }
+    }, [visible]);
 
     const handleAddComment = async () => {
         if (!newComment.trim()) return;
@@ -20,12 +36,19 @@ const MobileComments: React.FC<MobileCommentsProps> = ({ visible, onClose, postU
         try {
             await onAddComment(newComment.trim());
             setNewComment('');
+            await onLoadComments();
         } catch (error) {
             console.error('Error adding comment:', error);
         } finally {
             setIsSubmitting(false);
         }
     };
+
+    const renderComments = ({item}) => (
+        <Text style={styles.commentText}>
+            <Text style={styles.bold}>{item.username ? item.username: "anonymous" }</Text>: {item.comment}
+        </Text>
+    );
 
     return (
         <Modal
@@ -45,19 +68,19 @@ const MobileComments: React.FC<MobileCommentsProps> = ({ visible, onClose, postU
 
                     <View style={styles.commentSection}>
                         <Text style={styles.commentTitle}>Comments</Text>
-                        <Text>
-                            <Text style={styles.bold}>{postUser}</Text>: {caption}
+                        <Text style={styles.commentText}>
+                            <Text style={styles.bold}>{postUser ? postUser: "anonymous" }</Text>: {caption}
                         </Text>
 
-                        <FlatList
-                            data={comments}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item }) => (
-                                <View style={styles.commentContainer}>
-                                    <Text style={styles.commentText}>{item}</Text>
-                                </View>
-                            )}
-                        />
+                        {load ? (
+                            <ActivityIndicator size="large" color="#0f0f0f" />
+                        ) : (
+                            <FlatList
+                                data={comments}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={renderComments}
+                            />
+                        )}
 
                         <TextInput
                             style={styles.commentBox}
@@ -76,9 +99,7 @@ const MobileComments: React.FC<MobileCommentsProps> = ({ visible, onClose, postU
                             onPress={handleAddComment}
                             disabled={isSubmitting}
                         >
-                            <Text style={styles.submitButtonText}>
-                                {isSubmitting ? 'Submitting...' : 'Submit'}
-                            </Text>
+                            <Text style={styles.submitButtonText}>{isSubmitting ? 'Submitting...' : 'Submit'}</Text>
                         </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>

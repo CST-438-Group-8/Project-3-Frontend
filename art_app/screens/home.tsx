@@ -4,23 +4,15 @@ import Toast from 'react-native-toast-message';
 import { UserContext } from '../components/UserInfo';
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, useWindowDimensions, Dimensions, Modal, Button, Platform, ActivityIndicator } from 'react-native';
 import { theme } from '../components/theme';
-import { handleUploadScreen, handleLogout, viewUserProfile } from '../components/NavigationFunctions';
+import { viewUserProfile } from '../components/NavigationFunctions';
 import WebComments from 'components/WebComments';
 import MobileComments from 'components/MobileComments';
 import axios from 'axios';
 
-//example item type
-interface Item {
-  caption: string;
-  img: string;
-  user: string;
-  datePosted: string;
-}
-
 const { width, height } = Dimensions.get("window");
 
 const Home = ({ navigation }) => {
-  const { email, setEmail, setUsername, user_id } = useContext(UserContext);
+  const { email, setEmail, setUsername, userId } = useContext(UserContext);
   const { width, height } = useWindowDimensions();
   const [webModalVisible, setWebModalVisible] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
@@ -31,30 +23,10 @@ const Home = ({ navigation }) => {
   const [postUser, setPostUser] = useState('');
   const [postId, setPostId] = useState(null);
   const [load, setLoad] = useState(true);
+  const [posts, setPosts] = useState([]);
+  const [comments, setComments] = useState([]);
 
   const sampleImage = 'https://media.istockphoto.com/id/1222357475/vector/image-preview-icon-picture-placeholder-for-website-or-ui-ux-design-vector-illustration.jpg?s=2048x2048&w=is&k=20&c=CJLIU6nIISsrHLTVO04nxIH2zVaKbnUeUXp7PnpM2h4=';
-  const sapmle2 = 'https://images.pexels.com/photos/1459505/pexels-photo-1459505.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
-
-  const itemData: Item[] = [
-    {
-      caption: 'A beautiful sunrise over the mountains',
-      img: sampleImage,
-      user: 'User1',
-      datePosted: '2024-11-01',
-    },
-    {
-      caption: 'Exploring the forest trails',
-      img: sapmle2,
-      user: 'User2',
-      datePosted: '2024-11-02',
-    },
-    {
-      caption: 'Chilling by the beach on a sunny day',
-      img: sampleImage,
-      user: 'User3',
-      datePosted: '2024-11-03',
-    },
-  ];
 
   useEffect(() => {
     if(load){
@@ -71,6 +43,7 @@ const Home = ({ navigation }) => {
     try {
       const response = await axios.request(options);
       console.log(response.data);
+      setPosts(response.data);
       setLoad(false);
     } catch(error) {
       console.log('Fetching Posts:',error);
@@ -78,30 +51,45 @@ const Home = ({ navigation }) => {
     }
   }
   
-  const addComment = async() => {
+  const addComment = async(comment) => {
     // https://group8-project3-09c9182c5047.herokuapp.com/comments/addComment?comment={}&user_id={}&post_id={}
     const options = {
       method: 'POST',
       url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/addComment',
-      params: {
-        'comment':'',
-        'user_id': user_id,
-        'post_id': postId,
+      data: {
+        comment: comment,
+        user_id: userId,
+        post_id: postId,
       }
     };
     try {
       const response = await axios.request(options);
       console.log(response.data);
     } catch(error) {
-      console.log('Fetching Posts:',error);
+      console.log('Comment Error:',error);
     }
   }
 
   const getPostComments = async() => {
-    // link
+    // https://group8-project3-09c9182c5047.herokuapp.com/comments/Comments/?post_id={}
+    const options = {
+      method: 'GET',
+      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/Comments/',
+      params: {
+        'post_id': postId,
+      }
+    };
+    try {
+      const response = await axios.request(options);
+      console.log(response.data);
+      setComments(response.data);
+    } catch(error) {
+      console.log('Comments Error:',error);
+    }
   }
 
   const postViewAction = (user, cap, img, act, postId) => {
+    setComments([]);
     setCaption(cap);
     setViewImg(img);
     setPostId(postId);
@@ -112,7 +100,7 @@ const Home = ({ navigation }) => {
       console.log(viewImg);
     } else {
       if (act == 1) {
-        setCommentModalVisible(true)
+        setCommentModalVisible(true);
       }
       else {
         setImageModalVisible(true);
@@ -124,21 +112,20 @@ const Home = ({ navigation }) => {
     <View style={styles.postBox}>
       <View style={styles.row}>
         {/* <TouchableOpacity onPress={() => viewUserProfile(navigation)}> */}
-          <Text style={styles.info}>{item.user}</Text>
+          <Text style={styles.info}>{item.username ? item.username: "anonymous" }</Text>
         {/* </TouchableOpacity> */}
 
-        <Text style={styles.info}>{item.datePosted}</Text>
       </View>
 
-      <TouchableOpacity onPress={() => postViewAction(item.user, item.caption, item.img, 2, 0)}>
-        <Image source={{ uri: item.img }} style={styles.image} />
+      <TouchableOpacity onPress={() => postViewAction(item.username, item.caption, item.image, 2, item.post_id)}>
+        <Image source={{ uri: item.image ? item.image : sampleImage }} style={styles.image}/>
       </TouchableOpacity>
 
       <View style={styles.row}>
         <Text style={styles.caption}>
           <Text style={styles.bold}>{item.caption}</Text>
         </Text>
-        <TouchableOpacity style={styles.commentBtn} onPress={() => postViewAction(item.user, item.caption, item.img, 1, 0)}>
+        <TouchableOpacity style={styles.commentBtn} onPress={() => postViewAction(item.username, item.caption, item.image, 1, item.post_id)}>
           <Ionicons name="chatbubble-outline" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -151,9 +138,9 @@ const Home = ({ navigation }) => {
       {load ? (
         <ActivityIndicator size="large" color="#f0f0f0" />
       ) : (
-        itemData.length > 0 ? (
+        posts.length > 0 ? (
           <FlatList
-            data={itemData}
+            data={posts}
             renderItem={renderItem}
             keyExtractor={(item) => item.datePosted}
             numColumns={numColumns}
@@ -173,8 +160,9 @@ const Home = ({ navigation }) => {
         imageUrl={viewImg}
         caption={viewCaption}
         postUser={postUser}
-        // comments={comments}
-        // onAddComment={handleAddComment}
+        comments={comments}
+        onAddComment={addComment}
+        onLoadComments={getPostComments}
       />
 
       {/* Mobile view Image */}
@@ -190,8 +178,7 @@ const Home = ({ navigation }) => {
           <TouchableOpacity style={styles.closeButton} onPress={() => setImageModalVisible(false)}>
             <Text style={styles.closeButtonText}>X</Text>
           </TouchableOpacity>
-        
-          <Image source={{ uri: viewImg }} style={styles.mobileimg} />
+          <Image source={{ uri: viewImg ? viewImg : sampleImage }} style={styles.mobileimg} />
         </View>
       </Modal>
 
@@ -201,8 +188,9 @@ const Home = ({ navigation }) => {
         onClose={() => setCommentModalVisible(false)}
         caption={viewCaption}
         postUser={postUser}
-        // comments={comments}
-        // onAddComment={handleAddComment}
+        comments={comments}
+        onAddComment={addComment}
+        onLoadComments={getPostComments}
       />
 
       <Toast/>

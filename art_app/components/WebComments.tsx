@@ -1,32 +1,58 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, Image, TouchableOpacity, StyleSheet, FlatList, GestureResponderEvent } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Modal, View, Text, TextInput, Image, TouchableOpacity, StyleSheet, FlatList, GestureResponderEvent, ActivityIndicator } from 'react-native';
 import { theme } from '../components/theme';
 
 interface WebCommentsProps {
     visible: boolean;
     onClose: (event?: GestureResponderEvent) => void;
     imageUrl: string;
+    postUser: string;
     caption: string;
     comments: string[];
     onAddComment: (comment: string) => Promise<void>;
+    onLoadComments: () => Promise<void>;
 }
 
-const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, postUser , caption, comments, onAddComment }) => {
+const sampleImage = 'https://media.istockphoto.com/id/1222357475/vector/image-preview-icon-picture-placeholder-for-website-or-ui-ux-design-vector-illustration.jpg?s=2048x2048&w=is&k=20&c=CJLIU6nIISsrHLTVO04nxIH2zVaKbnUeUXp7PnpM2h4=';
+
+const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, postUser , caption, comments, onAddComment, onLoadComments}) => {
     const [newComment, setNewComment] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [load, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        if (visible) {
+            try {
+                onLoadComments();
+                console.log("Comments: " + comments);
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            } finally {
+                setLoading(false); // Set loading state after fetch attempt
+            }
+            
+        }
+    }, [visible]);
 
     const handleAddComment = async () => {
         if (!newComment.trim()) return; 
-            setIsSubmitting(true);
+        setIsSubmitting(true);
         try {
             await onAddComment(newComment.trim());
             setNewComment('');
+            await onLoadComments();
         } catch (error) {
             console.error('Error adding comment:', error);
         } finally {
             setIsSubmitting(false);
         }
     };
+
+    const renderComments = ({item}) => (
+        <Text style={styles.commentText}>
+            <Text style={styles.bold}>{item.username ? item.username: "anonymous" }</Text>: {item.comment}
+        </Text>
+    );
 
     return (
         <Modal
@@ -42,35 +68,30 @@ const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, p
                     </TouchableOpacity>
 
                     <View style={styles.imageSection}>
-                        <Image source={{ uri: imageUrl }} style={styles.image} />
+                        <Image source={{ uri: imageUrl ? imageUrl : sampleImage }}  style={styles.image} />
                     </View>
 
                     <View style={styles.commentSection}>
-
                         <Text style={styles.commentTitle}>Comments</Text>
-                        <Text>
-                            <Text style={styles.bold}>{postUser}</Text>: {caption}
+                        <Text style={styles.commentText}>
+                            <Text style={styles.bold}>{postUser ? postUser: "anonymous" }</Text>: {caption}
                         </Text>
 
-                        <FlatList
-                            data={comments}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item }) => (
-                                // <Text style={styles.comment}>
-                                //     <Text style={styles.bold}>username: </Text>{item}
-                                // </Text>
-                                <Text style={styles.comment}>
-                                    {item}
-                                </Text>
-                            )}
-                        />
+                        {load ? (
+                            <ActivityIndicator size="large" color="#0f0f0f" />
+                        ) : (
+                            <FlatList
+                                data={comments}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={renderComments}
+                            />
+                        )}
 
-                        {/* Add New Comment */}
                         <TextInput
                             style={styles.commentBox}
                             placeholder="Write your comment here..."
                             multiline={true}
-                            numberOfLines={2} // Restrict to two visible lines
+                            numberOfLines={2} 
                             value={newComment}
                             onChangeText={(text) => setNewComment(text)}
                         />
@@ -156,6 +177,10 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top', // Keeps the text aligned at the top
         marginBottom: 10,
     },    
+    commentText: {
+        fontSize: 14,
+        color: '#333',
+    },
     submitButton: {
         backgroundColor: '#2196F3',
         padding: 10,

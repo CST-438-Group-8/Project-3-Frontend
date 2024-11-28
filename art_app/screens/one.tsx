@@ -5,22 +5,34 @@ import { theme } from '../components/theme';
 import Toast from 'react-native-toast-message';
 import { handleUploadScreen } from '../components/NavigationFunctions';
 import axios from 'axios';
+import { useIsFocused } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 export default function TabOneScreen({ navigation }) {
-  const { email, username, user_id } = useContext(UserContext);
+  const { email, username, userId } = useContext(UserContext);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [viewImg, setViewImg] = useState('');
   const sampleImg = 'https://i.pinimg.com/originals/08/4a/92/084a925dd6a5cc7c47ea3b916efcd259.gif'
   const [posts, SetPosts] = useState([]);
   const [load, setLoad] = useState(true);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    if(load){
+    if (isFocused) {
+      console.log('Screen is focused');
+      setLoad(true);
       getPosts();
     }
-  }, [])
+  }, [isFocused]);
+  // useEffect(() => {
+  //   const isFocused = useIsFocused();
+  
+  //   if (isFocused) {
+  //     setLoad(true);
+  //     getPosts();
+  //   }
+  // }, [useIsFocused]);
   
   const getPosts = async() => {
     // https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/getUserPosts/?user_id={}
@@ -28,13 +40,13 @@ export default function TabOneScreen({ navigation }) {
       method: 'GET',
       url: 'https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/getUserPosts/',
       params: {
-        'user_id':user_id,
+        'user_id':userId,
       }
     };
     try {
       const response = await axios.request(options);
-      console.log(response.data);
-      SetPosts(response.data);
+      console.log(response.data.Posts);
+      SetPosts(response.data.Posts);
       setLoad(false);
     } catch(error) {
       console.log('Fetching User Posts:',error);
