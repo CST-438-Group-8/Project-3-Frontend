@@ -1,9 +1,10 @@
 import React, { useContext, useEffect } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, View, Alert } from 'react-native';
 import * as Google from 'expo-auth-session/providers/google';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import { UserContext } from 'components/UserInfo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UserContext } from '../components/UserInfo';
 
 const webClientId = '763302642477-t7v8ppah1lfcbkfu4kmdj59fv06aig0t.apps.googleusercontent.com';
 
@@ -14,39 +15,28 @@ export default function WebSplashScreen({ navigation }) {
 
     const [request, response, promptAsync] = Google.useAuthRequest({
         clientId: webClientId,
-        redirectUri: AuthSession.makeRedirectUri({
-            useProxy: true,
-        }),
+        redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
     });
-
-    useEffect(() => {
-        const checkStoredToken = async () => {
-            const token = localStorage.getItem('userToken');
-            if (token) {
-                fetchUserEmail(token);
-            }
-        };
-        checkStoredToken();
-    }, []);
 
     useEffect(() => {
         if (response?.type === 'success' && response.authentication) {
             const { accessToken } = response.authentication;
-            localStorage.setItem('userToken', accessToken); // Save token to localStorage
-            fetchUserEmail(accessToken);
+            AsyncStorage.setItem('userToken', accessToken) // Save token to AsyncStorage
+                .catch(err => console.error('Failed to save token:', err));
+            handleUserAuthentication(accessToken);
         }
     }, [response]);
 
-    async function fetchUserEmail(token) {
-        console.log(token);
+    async function handleUserAuthentication(token) {
         try {
             const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const userInfo = await res.json();
-            setEmail(userInfo.email);
-            navigation.navigate('DrawerNavigator', { screen: 'Home' });
+            setEmail(userInfo.email); // Save the user's email using setEmail
+            navigation.navigate("SignUpScreen"); // Always navigate to the SignUp screen
         } catch (error) {
+            Alert.alert('Error', 'Failed to fetch user information. Please try again.');
             console.error('Failed to fetch user email:', error);
         }
     }
@@ -58,6 +48,7 @@ export default function WebSplashScreen({ navigation }) {
                 title="Sign in with Google"
                 disabled={!request}
                 onPress={() => promptAsync({ useProxy: true })}
+                accessibilityLabel="Sign in with Google"
             />
         </View>
     );

@@ -1,34 +1,58 @@
-import React, { useState, useContext } from 'react';
-import {View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Button, Modal, Dimensions, Platform,} from 'react-native';
-import { UserContext } from 'components/UserInfo';
+import React, { useState, useContext, useEffect} from 'react';
+import {View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Button, Modal, Dimensions, Platform, ActivityIndicator} from 'react-native';
+import { UserContext } from '../components/UserInfo';
 import { theme } from '../components/theme';
 import Toast from 'react-native-toast-message';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { handleUploadScreen, handleLogout } from '../components/NavigationFunctions';
+import { handleUploadScreen } from '../components/NavigationFunctions';
+import axios from 'axios';
+import { useIsFocused } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 export default function TabOneScreen({ navigation }) {
-  const { email, setEmail, setUsername } = useContext(UserContext);
+  const { email, username, userId } = useContext(UserContext);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [viewImg, setViewImg] = useState('');
-
-  const samplePosts = [
-    { id: '1', img: 'https://i.pinimg.com/736x/a9/ce/58/a9ce582aa9af058f46f4d68a2f82d2db.jpg' },
-    { id: '2', img: 'https://wallpapers.com/images/hd/beautiful-amazing-oc3t2l6g6fahorhm.jpg' },
-    { id: '3', img: 'https://wallpapers.com/images/high/harry-potter-halloween-1920-x-1080-3d939fixt9dskr2q.webp' },
-    { id: '4', img: 'https://wallpapers.com/images/high/back-of-white-jdm-car-g0f7uwy6478rkox0.webp' },
-    { id: '5', img: 'https://wallpapers.com/images/high/traditional-japanese-art-5ct3ftw11yj6nmxb.webp' },
-    { id: '6', img: 'https://wallpapers.com/images/high/thorough-forest-city-2e3rc39qh4luus2m.webp' },
-  ];
   const sampleImg = 'https://i.pinimg.com/originals/08/4a/92/084a925dd6a5cc7c47ea3b916efcd259.gif'
-  const profileData = {
-    username: 'YourUsername',
-    profilePicture: sampleImg,
-    posts: 42,
-    followers: 1200,
-    following: 180,
-  };
+  const [posts, SetPosts] = useState([]);
+  const [load, setLoad] = useState(true);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      console.log('Screen is focused');
+      setLoad(true);
+      getPosts();
+    }
+  }, [isFocused]);
+  // useEffect(() => {
+  //   const isFocused = useIsFocused();
+  
+  //   if (isFocused) {
+  //     setLoad(true);
+  //     getPosts();
+  //   }
+  // }, [useIsFocused]);
+  
+  const getPosts = async() => {
+    // https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/getUserPosts/?user_id={}
+    const options = {
+      method: 'GET',
+      url: 'https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/getUserPosts/',
+      params: {
+        'user_id':userId,
+      }
+    };
+    try {
+      const response = await axios.request(options);
+      console.log(response.data.Posts);
+      SetPosts(response.data.Posts);
+      setLoad(false);
+    } catch(error) {
+      console.log('Fetching User Posts:',error);
+      setLoad(false);
+    }
+  }
 
   const openImageModal = (img) => {
     setViewImg(img);
@@ -43,28 +67,31 @@ export default function TabOneScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.welcomeSection}>
-        <Text>Welcome to the home screen!</Text>
-        <Text>Email: {email}</Text>
-        <Button
-          title="Logout"
-          onPress={() => handleLogout(AsyncStorage, setEmail, setUsername, Platform, navigation)}
+      <View style={styles.profileHeader}>
+        <View style={styles.row}>
+          <Image source={{ uri: sampleImg }} style={styles.profilePicture} />
+          <View style={styles.profileInfo}>
+            <Text style={styles.username}>{username}</Text>
+            <Text style={styles.email}>{email}</Text>
+          </View>
+        </View>
+      </View>
+
+      {load ? (
+        <ActivityIndicator size="large" color="#f0f0f0" />
+      ) : (
+        <FlatList
+          data={posts}
+          renderItem={renderPost}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          contentContainerStyle={styles.postsGrid}
         />
+      )}
+
+      <View style={styles.welcomeSection}>
         <Button title="Upload" onPress={() => handleUploadScreen(Platform, navigation)} />
       </View>
-
-      <View style={styles.profileHeader}>
-        <Image source={{ uri: profileData.profilePicture }} style={styles.profilePicture} />
-      </View>
-      <Text style={styles.username}>{email}</Text>
-
-      <FlatList
-        data={samplePosts}
-        renderItem={renderPost}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        contentContainerStyle={styles.postsGrid}
-      />
 
       <Modal
         visible={imageModalVisible}
@@ -92,6 +119,11 @@ const styles = StyleSheet.create({
   welcomeSection: {
     padding: 10,
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   profileHeader: {
     flexDirection: 'column',
     alignItems: 'center',
@@ -106,11 +138,18 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginRight: 20,
   },
+  profileInfo: {
+    flexDirection: 'column',
+  },
   username: {
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 10,
+    color: theme.colors.cap,
+  },
+  email: {
+    fontSize: 14,
+    color: '#888', 
+    marginTop: 4,
   },
   postsGrid: {
     marginHorizontal: 5,

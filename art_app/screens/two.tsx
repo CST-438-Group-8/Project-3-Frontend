@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Image, Alert, Platform,} from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../components/theme';
+import { UserContext } from '../components/UserInfo';
+import { handleLogout } from '../components/NavigationFunctions';
 
 export default function SettingsScreen({ navigation }) {
+  const {setUsername, setEmail} = useContext(UserContext);
+
   const [profilePicture, setProfilePicture] = useState(
     'https://via.placeholder.com/100' // Default profile picture
   );
-
-  const handleSignOut = async () => {
-    //need function
-  };
 
   const handleChangeProfilePicture = () => {
     const options = {
@@ -42,7 +42,7 @@ export default function SettingsScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
+      <TouchableOpacity onPress={() => handleLogout(AsyncStorage, setEmail, setUsername, Platform, navigation)} style={styles.signOutButton}>
         <Text style={styles.signOutText}>Sign Out</Text>
       </TouchableOpacity>
     </View>

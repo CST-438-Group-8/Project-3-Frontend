@@ -26,7 +26,7 @@ export default function TabLayout({ navigation }: Props) {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <Ionicons name="person" color={color} />,
-          headerRight: () => <HeaderButton onPress={() => navigation.navigate('Modal')} />,
+          // headerRight: () => <HeaderButton onPress={() => navigation.navigate('Modal')} />,
         }}
       />
       <Tab.Screen

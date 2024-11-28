@@ -4,10 +4,9 @@ import {
     GoogleSigninButton,
     statusCodes,
 } from '@react-native-google-signin/google-signin';
-import { StyleSheet, Text, View, Platform} from 'react-native';
-import { signIn } from 'components/signin';
-import { UserContext } from 'components/UserInfo';
-import { Button } from 'components/Button';
+import { StyleSheet, Text, View, Platform, Image} from 'react-native';
+import { signIn } from '../components/signin';
+import { UserContext } from '../components/UserInfo';
 
 const webClientId = '763302642477-t7v8ppah1lfcbkfu4kmdj59fv06aig0t.apps.googleusercontent.com';
 const AndroidClientId = '763302642477-2i0f9s1o4882a9tj1b4e3v7ng7cvvojs.apps.googleusercontent.com';
@@ -27,7 +26,6 @@ export default function SplashScreen({navigation}) {
 
     return (
         <View style={styles.container}>
-            <Text>Login to app</Text>
             <GoogleSigninButton
                 size={GoogleSigninButton.Size.Wide}
                 color={GoogleSigninButton.Color.Dark}

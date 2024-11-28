@@ -6,7 +6,7 @@ import Modal from '../screens/modal';
 import viewUser from '../screens/viewUser';
 import SplashScreen from '../screens/SplashScreen';
 import WebSplashScreen from '../screens/WebSplashScreen';
-import { SignUpScreen } from '../screens/SignUpScreenContent';
+import SignUpScreen from '../screens/SignUp';
 import WebImageUpload from '../screens/WebImageUpload';
 import AppImageUpload from '../screens/AppImageUpload';
 
