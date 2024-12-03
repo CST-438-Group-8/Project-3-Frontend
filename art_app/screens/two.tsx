@@ -9,39 +9,8 @@ import { handleLogout } from '../components/NavigationFunctions';
 export default function SettingsScreen({ navigation }) {
   const {setUsername, setEmail} = useContext(UserContext);
 
-  const [profilePicture, setProfilePicture] = useState(
-    'https://via.placeholder.com/100' // Default profile picture
-  );
-
-  const handleChangeProfilePicture = () => {
-    const options = {
-      mediaType: 'photo',
-      maxWidth: 300,
-      maxHeight: 300,
-      quality: 0.8,
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorCode) {
-        console.error('ImagePicker Error: ', response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        const selectedImage = response.assets[0].uri;
-        setProfilePicture(selectedImage);
-      }
-    });
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.profileSection}>
-        <Image source={{ uri: profilePicture }} style={styles.profilePicture} />
-        <TouchableOpacity onPress={handleChangeProfilePicture} style={styles.changePictureButton}>
-          <Text style={styles.changePictureText}>Change Profile Picture</Text>
-        </TouchableOpacity>
-      </View>
-
       <TouchableOpacity onPress={() => handleLogout(AsyncStorage, setEmail, setUsername, Platform, navigation)} style={styles.signOutButton}>
         <Text style={styles.signOutText}>Sign Out</Text>
       </TouchableOpacity>

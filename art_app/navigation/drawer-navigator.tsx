@@ -6,7 +6,7 @@ import { HeaderButton } from 'components/HeaderButton';
 import { RootStackParamList } from '.';
 import TabNavigator from './tab-navigator';
 import Home from '../screens/home';
-
+import AppImageUpload from 'screens/AppImageUpload';
 type Props = StackScreenProps<RootStackParamList, 'DrawerNavigator'>;
 
 const Drawer = createDrawerNavigator();
@@ -33,6 +33,15 @@ export default function DrawerNavigator({ navigation }: Props) {
           ),
         }}
       />
+      <Drawer.Screen
+          name="Image Upload"
+          component={AppImageUpload}
+          options={{
+            drawerIcon: ({ size, color }) => (
+              <Ionicons name="image-outline" size={size} color={color} />
+            ),
+          }}
+        />
     </Drawer.Navigator>
   );
 }
