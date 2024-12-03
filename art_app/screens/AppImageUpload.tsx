@@ -1,122 +1,164 @@
 import React, { useState, useContext } from 'react';
-import { View, Button, Image, StyleSheet, TextInput, Alert, ActivityIndicator } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import axios from 'axios';
-import { UserContext } from '../components/UserInfo';
+import { StyleSheet, View, Button, Image, Text, TextInput, ScrollView } from 'react-native';
+import { UserContext } from '../components/UserInfo'; 
 
 const AppImageUpload: React.FC = () => {
-  const { userId } = useContext(UserContext);
   const [image, setImage] = useState<string | null>(null);
+  const [imgurLink, setImgurLink] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [caption, setCaption] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const { userId } = useContext(UserContext); 
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'Images', allowsEditing: true, quality: 1, });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
-
-  const uploadToImgur = async (imageUri: string) => {
-    const formData = new FormData();
-    formData.append('image', {
-      uri: imageUri,
-      type: 'image/jpeg',
-      name: 'upload.jpg',
-    });
-
-    let retries = 3;
-    let delay = 2000;
-
-    while (retries > 0) {
-      try {
-        const response = await axios.post('https://api.imgur.com/3/image', formData, {
-          headers: {
-            Authorization: 'Client-ID 114b305e3677bf6',
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        return response.data.data.link;
-      } catch (error) {
-        if (error.response?.status === 429 && retries > 0) {
-          console.warn(`Rate limit hit. Retrying in ${delay / 1000} seconds...`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          retries--;
-          delay *= 2;
-        } else {
-          console.error('Imgur Upload Error:', error.response?.data || error.message);
-          throw error;
-        }
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImage(URL.createObjectURL(file));
+      const link = await imgur_upload(file); // Upload image and get Imgur link
+      if (link) {
+        setImgurLink(link);
       }
     }
-
-    throw new Error('Failed to upload after multiple tries');
   };
 
-  const createPost = async () => {
-    if (!image || !caption) {
-      Alert.alert('Error', 'Please select an image and provide a caption.');
+  const imgur_upload = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      setUploadStatus('Uploading to Imgur...');
+
+      const response = await fetch('https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/upload/', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUploadStatus('Upload successful!');
+        return data.data.link;
+      } else {
+        const error = await response.json();
+        console.error('Imgur upload failed:', error);
+        setUploadStatus('Imgur upload failed!');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error during Imgur upload:', error);
+      setUploadStatus('Imgur upload failed!');
+      return null;
+    }
+  };
+
+  const saveToDatabase = async () => {
+    if (!imgurLink) {
+      setUploadStatus('Please upload an image first.');
+      return;
+    }
+    if (!caption.trim()) {
+      setUploadStatus('Please enter a caption.');
       return;
     }
 
-    setLoading(true);
     try {
-      console.log('Uploading image...');
-      const imgurLink = await uploadToImgur(image);
-      console.log('Imgur link:', imgurLink);
+      setUploadStatus('Saving to database...');
 
-      const response = await axios.post(
-        `https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/createPost/`,
-        null,
-        {
-          params: {
-            user_id: userId,
-            image: imgurLink,
-            caption: caption,
-          },
-        }
+      const response = await fetch(
+        `https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/createPost/?user_id=${userId}&image=${encodeURIComponent(
+          imgurLink
+        )}&caption=${encodeURIComponent(caption)}`,
+        { method: 'POST' }
       );
 
-      console.log('Post created:', response.data);
-
-      setLoading(false);
-      Alert.alert('Success', 'Post created successfully!');
-      setImage(null);
-      setCaption('');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Post saved successfully:', data);
+        setUploadStatus('Post saved successfully!');
+      } else {
+        const error = await response.json();
+        console.error('Failed to save post:', error);
+        setUploadStatus('Failed to save post!');
+      }
     } catch (error) {
-      setLoading(false);
-      console.error('Create Post Error:', error);
-      Alert.alert('Error', 'Failed to create post. Please try again.');
+      console.error('Error saving to database:', error);
+      setUploadStatus('Failed to save post!');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Button title="Pick an Image" onPress={pickImage} />
-      {image && <Image source={{ uri: image }} style={styles.image} />}
-      <TextInput
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Upload an Image</Text>
+      <View style={styles.separator} />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
         style={styles.input}
-        placeholder="Enter a caption"
+      />
+      {image && (
+        <Image
+          source={{ uri: image }}
+          style={styles.image}
+          resizeMode="contain"
+        />
+      )}
+      <TextInput
+        style={styles.textInput}
+        placeholder="Enter a caption..."
         value={caption}
         onChangeText={setCaption}
       />
-      <Button title="Create Post" onPress={createPost} />
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
-    </View>
+      {imgurLink && (
+        <Button title="Create Post" onPress={saveToDatabase} />
+      )}
+      {uploadStatus && <Text>{uploadStatus}</Text>}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
-  image: { width: 200, height: 200, marginVertical: 10 },
+  container: {
+    alignItems: 'center',
+    justifyContent: 'flex-start', // Allow scrolling from the top
+    paddingHorizontal: 20,
+    paddingVertical: 20, // Add spacing for scroll content
+    backgroundColor: '#F9FAFB',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  separator: {
+    height: 1,
+    width: '80%',
+    backgroundColor: '#D1D5DB',
+    marginBottom: 20,
+  },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    marginBottom: 15,
+    fontSize: 16,
     padding: 10,
-    marginVertical: 10,
-    width: '100%',
-    borderRadius: 8,
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderRadius: 5,
+    width: '80%',
+  },
+  image: {
+    marginTop: 20,
+    width: '100%', // Make the image width responsive
+    height: undefined,
+    aspectRatio: 1, // Maintain aspect ratio
+    borderRadius: 10,
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+  },
+  textInput: {
+    marginTop: 20,
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    width: '80%',
   },
 });
 
