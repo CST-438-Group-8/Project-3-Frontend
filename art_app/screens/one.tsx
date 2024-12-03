@@ -89,10 +89,6 @@ export default function TabOneScreen({ navigation }) {
         />
       )}
 
-      <View style={styles.welcomeSection}>
-        <Button title="Upload" onPress={() => handleUploadScreen(Platform, navigation)} />
-      </View>
-
       <Modal
         visible={imageModalVisible}
         transparent

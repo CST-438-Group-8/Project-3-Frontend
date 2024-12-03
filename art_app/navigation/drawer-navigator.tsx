@@ -7,6 +7,7 @@ import { RootStackParamList } from '.';
 import TabNavigator from './tab-navigator';
 import Home from '../screens/home';
 import AppImageUpload from 'screens/AppImageUpload';
+import WebImageUpload from 'screens/WebImageUpload';
 type Props = StackScreenProps<RootStackParamList, 'DrawerNavigator'>;
 
 const Drawer = createDrawerNavigator();
