@@ -6,7 +6,7 @@ function UserInfo({ children }) {
   const [userId, setUserId] = useState<number>(-1);
   const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [viewingUser, setViewingUser] = useState<string>('');
+  const [viewingUser, setViewingUser] = useState<number>(-1);
 
   const value = {
     userId, setUserId,
