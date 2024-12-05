@@ -1,3 +1,7 @@
+# DOCKER(use below cmnds)
+# - docker build -t web_app .
+# - docker run web_app
+
 # Use a Node.js base image to run the app
 FROM node:20
 
