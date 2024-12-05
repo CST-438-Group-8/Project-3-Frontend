@@ -66,10 +66,10 @@ const Home = ({ navigation }) => {
   }
 
   const getPostComments = async() => {
-    // https://group8-project3-09c9182c5047.herokuapp.com/comments/Comments/?post_id={}
+    // https://group8-project3-09c9182c5047.herokuapp.com/comments/userComments
     const options = {
       method: 'GET',
-      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/Comments/',
+      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/userComments',
       params: {
         'post_id': postId,
       }
