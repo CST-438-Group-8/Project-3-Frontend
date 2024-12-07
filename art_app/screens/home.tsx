@@ -74,11 +74,12 @@ const Home = ({ navigation }) => {
     // https://group8-project3-09c9182c5047.herokuapp.com/comments/Comments/?post_id={}
     const options = {
       method: 'GET',
-      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/Comments/',
+      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/userComments',// Comments
       params: {
         'post_id': postId,
       }
     };
+
     try {
       const response = await axios.request(options);
       console.log(response.data);
@@ -232,6 +233,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.tertiary,
     fontWeight: '400',
+    // backgroundColor : 'black'
   },
   bold: {
     fontWeight: 'bold',

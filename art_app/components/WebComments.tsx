@@ -54,6 +54,12 @@ const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, p
         </Text>
     );
 
+    const renderCaption = ({item}) => (
+        <Text style={styles.captionText}>
+            <Text style={styles.bold}>{item.username ? item.username: "anonymous" }</Text>: {item.comment}
+        </Text>
+    );
+
     return (
         <Modal
             visible={visible}
@@ -72,9 +78,16 @@ const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, p
                     </View>
 
                     <View style={styles.commentSection}>
+                        <Text style={styles.captionTitle}>Caption</Text>
+
+                        <Text style={styles.captionText}>
+                            <Text style={styles.bold}>{postUser ? postUser: "anonymous" }</Text>: {caption}
+                        </Text>
+                        <Text style={[styles.bold, { margin: 10 }]}></Text>
+
                         <Text style={styles.commentTitle}>Comments</Text>
                         <Text style={styles.commentText}>
-                            <Text style={styles.bold}>{postUser ? postUser: "anonymous" }</Text>: {caption}
+                            {/* <Text style={styles.bold}>{postUser ? postUser: "anonymous" }</Text>: {caption} */}
                         </Text>
 
                         {load ? (
@@ -159,6 +172,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
+    captionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
     comment: {
         fontSize: 14,
         marginBottom: 5,
@@ -178,6 +196,10 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },    
     commentText: {
+        fontSize: 14,
+        color: '#333',
+    },
+    captionText: {
         fontSize: 14,
         color: '#333',
     },
