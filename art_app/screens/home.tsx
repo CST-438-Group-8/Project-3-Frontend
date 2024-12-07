@@ -74,6 +74,7 @@ const Home = ({ navigation }) => {
         'post_id': postId,
       }
     };
+
     try {
       const response = await axios.request(options);
       console.log(response.data);
@@ -226,6 +227,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.tertiary,
     fontWeight: '400',
+    // backgroundColor : 'black'
   },
   bold: {
     fontWeight: 'bold',
