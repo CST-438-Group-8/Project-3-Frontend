@@ -1,26 +1,21 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useContext, useEffect } from 'react';
-import Toast from 'react-native-toast-message';
 import { UserContext } from '../components/UserInfo';
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, useWindowDimensions, Dimensions, Modal, Button, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, useWindowDimensions, Modal, ActivityIndicator } from 'react-native';
 import { theme } from '../components/theme';
 import { viewUserProfile } from '../components/NavigationFunctions';
-import WebComments from 'components/WebComments';
-import MobileComments from 'components/MobileComments';
+import WebComments from '../components/WebComments';
+import MobileComments from '../components/MobileComments';
 import axios from 'axios';
 
-const { width, height } = Dimensions.get("window");
-
 const Home = ({ navigation }) => {
-  const { email, setEmail, setUsername, userId } = useContext(UserContext);
-  const { width, height } = useWindowDimensions();
+  const { email, setEmail, setUsername, userId, setViewingUser } = useContext(UserContext);
+  const { width } = useWindowDimensions();
   const [webModalVisible, setWebModalVisible] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [numColumns, setNumColumns] = useState(width > 768 ? 3 : 1)
-  const [viewImg, setViewImg] = useState('');
-  const [viewCaption, setCaption] = useState('');
-  const [postUser, setPostUser] = useState('');
+  const [postInfo, setPostInfo] = useState([]);
   const [postId, setPostId] = useState(null);
   const [load, setLoad] = useState(true);
   const [posts, setPosts] = useState([]);
@@ -71,10 +66,10 @@ const Home = ({ navigation }) => {
   }
 
   const getPostComments = async() => {
-    // https://group8-project3-09c9182c5047.herokuapp.com/comments/Comments/?post_id={}
+    // https://group8-project3-09c9182c5047.herokuapp.com/comments/userComments
     const options = {
       method: 'GET',
-      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/Comments/',
+      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/userComments',
       params: {
         'post_id': postId,
       }
@@ -88,18 +83,16 @@ const Home = ({ navigation }) => {
     }
   }
 
-  const postViewAction = (user, cap, img, act, postId) => {
+  const postViewAction = (act, postInfo) => {
+    setPostInfo(postInfo);
     setComments([]);
-    setCaption(cap);
-    setViewImg(img);
-    setPostId(postId);
-    setPostUser(user);
+    setPostId(postInfo.post_id);
 
     if (numColumns == 3){
       setWebModalVisible(true);
-      console.log(viewImg);
     } else {
       if (act == 1) {
+        setImageModalVisible(true);
         setCommentModalVisible(true);
       }
       else {
@@ -111,13 +104,13 @@ const Home = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <View style={styles.postBox}>
       <View style={styles.row}>
-        {/* <TouchableOpacity onPress={() => viewUserProfile(navigation)}> */}
+        <TouchableOpacity onPress={() => viewUserProfile(navigation, item.user_id, setViewingUser, userId)}>
           <Text style={styles.info}>{item.username ? item.username: "anonymous" }</Text>
-        {/* </TouchableOpacity> */}
+        </TouchableOpacity>
 
       </View>
 
-      <TouchableOpacity onPress={() => postViewAction(item.username, item.caption, item.image, 2, item.post_id)}>
+      <TouchableOpacity onPress={() => postViewAction(2, item)}>
         <Image source={{ uri: item.image ? item.image : sampleImage }} style={styles.image}/>
       </TouchableOpacity>
 
@@ -125,7 +118,7 @@ const Home = ({ navigation }) => {
         <Text style={styles.caption}>
           <Text style={styles.bold}>{item.caption}</Text>
         </Text>
-        <TouchableOpacity style={styles.commentBtn} onPress={() => postViewAction(item.username, item.caption, item.image, 1, item.post_id)}>
+        <TouchableOpacity style={styles.commentBtn} onPress={() => postViewAction(1, item)}>
           <Ionicons name="chatbubble-outline" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -157,9 +150,9 @@ const Home = ({ navigation }) => {
       <WebComments
         visible={webModalVisible}
         onClose={() => setWebModalVisible(false)}
-        imageUrl={viewImg}
-        caption={viewCaption}
-        postUser={postUser}
+        imageUrl={postInfo.image}
+        caption={postInfo.caption}
+        postUser={postInfo.username}
         comments={comments}
         onAddComment={addComment}
         onLoadComments={getPostComments}
@@ -176,9 +169,12 @@ const Home = ({ navigation }) => {
       >
         <View style={styles.overlay}>
           <TouchableOpacity style={styles.closeButton} onPress={() => setImageModalVisible(false)}>
-            <Text style={styles.closeButtonText}>X</Text>
+            <Ionicons name="close" size={28} color="#fff" />
           </TouchableOpacity>
-          <Image source={{ uri: viewImg ? viewImg : sampleImage }} style={styles.mobileimg} />
+          <Image source={{ uri: postInfo.image ? postInfo.image : sampleImage }} style={styles.mobileimg} />
+          <TouchableOpacity style={styles.commentBtn} onPress={() => postViewAction(1, postInfo)}>
+            <Ionicons name="chatbubble-outline" size={28} color="#fff" />
+          </TouchableOpacity>
         </View>
       </Modal>
 
@@ -186,14 +182,12 @@ const Home = ({ navigation }) => {
       <MobileComments
         visible={commentModalVisible}
         onClose={() => setCommentModalVisible(false)}
-        caption={viewCaption}
-        postUser={postUser}
+        caption={postInfo.caption}
+        postUser={postInfo.username}
         comments={comments}
         onAddComment={addComment}
         onLoadComments={getPostComments}
       />
-
-      <Toast/>
     </View>
   );
 };
@@ -245,23 +239,21 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   mobileimg: {
-    width: '100%',
-    height: '100%',
+    width: '95%',
+    height: '85%',
     resizeMode: 'contain',
   },
   closeButton: {
     position: 'absolute',
-    top: 30,
-    right: 30,
-    zIndex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    top: 40,
+    right: 20,
+    zIndex: 10,
     padding: 10,
-    borderRadius: 50,
   },
   closeButtonText: {
     color: 'white',
@@ -272,12 +264,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.cap,
     fontWeight: '600',
-  },
-  emptyState: {
-    textAlign: 'center',
-    color: theme.colors.secondary,
-    fontSize: 14,
-    marginTop: 20,
   },
 });
 
