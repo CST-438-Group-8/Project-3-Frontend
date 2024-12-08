@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Modal, Dimensions, ActivityIndicator} from 'react-native';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../components/theme';
-import WebComments from '../components/WebComments';
 import MobileComments from '../components/MobileComments';
 import { useNavigation } from '@react-navigation/native';
+import WebCommentsProfile from './WebCommentsProfile';
 
 interface ProfileRenderProps {
     viewing: boolean;
@@ -14,11 +14,12 @@ interface ProfileRenderProps {
     username: string;
     email: string;
     userId: number;
+    handleUpdate: () => Promise<void>;
 }
 
 const {width} = Dimensions.get("window");;
 
-const ProfileRender: React.FC<ProfileRenderProps> = ({viewing, load, posts, username, email, userId}) => {
+const ProfileRender: React.FC<ProfileRenderProps> = ({viewing, load, posts, username, email, userId, handleUpdate}) => {
     const [viewImg, setViewImg] = useState('');
     const sampleImg = 'https://i.pinimg.com/originals/08/4a/92/084a925dd6a5cc7c47ea3b916efcd259.gif'
     const sampleImage = 'https://media.istockphoto.com/id/1222357475/vector/image-preview-icon-picture-placeholder-for-website-or-ui-ux-design-vector-illustration.jpg?s=2048x2048&w=is&k=20&c=CJLIU6nIISsrHLTVO04nxIH2zVaKbnUeUXp7PnpM2h4=';
@@ -65,7 +66,7 @@ const ProfileRender: React.FC<ProfileRenderProps> = ({viewing, load, posts, user
         } catch(error) {
             console.log('Comments Error:',error);
         }
-      }
+    }
 
     const postViewAction = (act, postInfo) => {
         setPostInfo(postInfo);
@@ -88,7 +89,7 @@ const ProfileRender: React.FC<ProfileRenderProps> = ({viewing, load, posts, user
     const openImageModal = (img) => {
         setViewImg(img);
         setImageModalVisible(true);
-      };
+    };
     
     const renderPost = ({ item }) => (
         <TouchableOpacity onPress={() => postViewAction(2, item)}>
@@ -134,15 +135,18 @@ const ProfileRender: React.FC<ProfileRenderProps> = ({viewing, load, posts, user
             )}
     
             {/* Web view Comments/Image */}
-            <WebComments
+            <WebCommentsProfile
                 visible={webModalVisible}
                 onClose={() => setWebModalVisible(false)}
                 imageUrl={postInfo.image}
                 caption={postInfo.caption}
                 postUser={postInfo.username}
+                post_id={postInfo.post_id}
                 comments={comments}
                 onAddComment={addComment}
                 onLoadComments={getPostComments}
+                onChange={() => setWebModalVisible(false)}
+                update={handleUpdate}
             />
 
             {/* Mobile view Image */}
