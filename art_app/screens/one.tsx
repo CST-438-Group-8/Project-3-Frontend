@@ -8,18 +8,24 @@ export default function TabOneScreen({ navigation }) {
   const { email, username, userId } = useContext(UserContext);
   const [posts, SetPosts] = useState([]);
   const [load, setLoad] = useState(true);
+  const [reload, setReload] = useState(false);
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (isFocused) {
+    if (isFocused || reload) {
       console.log('Screen is focused');
       setLoad(true);
+      setReload(false);
       getPosts();
     }
-  }, [isFocused]);
+  }, [isFocused, reload]);
+
+  const reloadScreen = async() => {
+    console.log('reload');
+    setReload(true);
+  }
   
   const getPosts = async() => {
-    // https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/getUserPosts/?user_id={}
     const options = {
       method: 'GET',
       url: 'https://group8-project3-09c9182c5047.herokuapp.com/user-post/posts/getUserPosts/',
@@ -46,6 +52,7 @@ export default function TabOneScreen({ navigation }) {
       username={username}
       email={email}
       userId={userId}
+      handleUpdate={reloadScreen}
     />
   );
 }
