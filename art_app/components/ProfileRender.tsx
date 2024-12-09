@@ -140,7 +140,8 @@ const ProfileRender: React.FC<ProfileRenderProps> = ({viewing, load, posts, user
                 onClose={() => setWebModalVisible(false)}
                 imageUrl={postInfo.image}
                 caption={postInfo.caption}
-                postUser={postInfo.username}
+                postUser={postInfo.user_id_id}
+                postUsername={username}
                 post_id={postInfo.post_id}
                 comments={comments}
                 onAddComment={addComment}
