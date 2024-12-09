@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Modal, View, Text, TextInput, Image, TouchableOpacity, StyleSheet, FlatList, GestureResponderEvent, ActivityIndicator } from 'react-native';
 import { theme } from './theme';
+import { UserContext } from '../components/UserInfo';
 import TextEdit from '../components/TextEdit';
 import axios from 'axios';
 
@@ -9,6 +10,7 @@ interface WebCommentsProps {
     onClose: (event?: GestureResponderEvent) => void;
     imageUrl: string;
     postUser: string;
+    postUsername: string;
     caption: string;
     comments: string[];
     post_id: string;
@@ -20,7 +22,8 @@ interface WebCommentsProps {
 
 const sampleImage = 'https://media.istockphoto.com/id/1222357475/vector/image-preview-icon-picture-placeholder-for-website-or-ui-ux-design-vector-illustration.jpg?s=2048x2048&w=is&k=20&c=CJLIU6nIISsrHLTVO04nxIH2zVaKbnUeUXp7PnpM2h4=';
 
-const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, postUser, caption, comments, post_id, onAddComment, onLoadComments, onChange, update }) => {
+const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, postUser, postUsername, caption, comments, post_id, onAddComment, onLoadComments, onChange, update }) => {
+    const { email, username, userId } = useContext(UserContext);
     const [newComment, setNewComment] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [load, setLoading] = useState<boolean>(true);
@@ -120,12 +123,14 @@ const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imag
                     </TouchableOpacity>
 
                     <View style={styles.imageSection}>
-                        <TouchableOpacity
-                            style={styles.dropdownButton}
-                            onPress={() => setDropdownVisible(!dropdownVisible)}
-                        >
-                            <Text style={styles.dropdownButtonText}>☰</Text>
-                        </TouchableOpacity>
+                        { userId === postUser && (
+                            <TouchableOpacity
+                                style={styles.dropdownButton}
+                                onPress={() => setDropdownVisible(!dropdownVisible)}
+                            >
+                                <Text style={styles.dropdownButtonText}>☰</Text>
+                            </TouchableOpacity>
+                        )}
                         {dropdownVisible && (
                         <View style={styles.dropdown}>
                             <TouchableOpacity
@@ -156,7 +161,7 @@ const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imag
                     <View style={styles.commentSection}>
                         <Text style={styles.captionTitle}>Caption</Text>
                         <Text style={styles.captionText}>
-                            <Text style={styles.bold}>{postUser || 'anonymous'}</Text>: {caption}
+                            <Text style={styles.bold}>{ postUsername || 'anonymous'}</Text>: {caption}
                         </Text>
                         <Text style={[styles.bold, { margin: 10 }]}></Text>
 
