@@ -2,12 +2,12 @@ import React, { useState, useContext } from 'react';
 import { StyleSheet, View, Button, Image, Text, TextInput, ScrollView } from 'react-native';
 import { UserContext } from '../components/UserInfo'; 
 
-const AppImageUpload: React.FC = () => {
+const AppImageUpload: React.FC = ({navigation}) => {
   const [image, setImage] = useState<string | null>(null);
   const [imgurLink, setImgurLink] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [caption, setCaption] = useState<string>('');
-  const { userId } = useContext(UserContext); 
+  const { userId } = useContext(UserContext);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -73,6 +73,11 @@ const AppImageUpload: React.FC = () => {
         const data = await response.json();
         console.log('Post saved successfully:', data);
         setUploadStatus('Post saved successfully!');
+        navigation.navigate("DrawerNavigator", {screen: "Profile"});
+        setImage('');
+        setImgurLink('');
+        setUploadStatus('');
+        setCaption('');
       } else {
         const error = await response.json();
         console.error('Failed to save post:', error);
@@ -95,12 +100,15 @@ const AppImageUpload: React.FC = () => {
         style={styles.input}
       />
       {image && (
-        <Image
-          source={{ uri: image }}
-          style={styles.image}
-          resizeMode="contain"
-        />
+        <View style={styles.imageContainer}>
+          <Image
+            source={{ uri: image }}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        </View>
       )}
+      {uploadStatus && <Text style={styles.spaced}>{uploadStatus}</Text>}
       <TextInput
         style={styles.textInput}
         placeholder="Enter a caption..."
@@ -108,9 +116,10 @@ const AppImageUpload: React.FC = () => {
         onChangeText={setCaption}
       />
       {imgurLink && (
-        <Button title="Create Post" onPress={saveToDatabase} />
+        <View style={styles.spaced}>
+          <Button title="Create Post" onPress={saveToDatabase} />
+        </View>
       )}
-      {uploadStatus && <Text>{uploadStatus}</Text>}
     </ScrollView>
   );
 };
@@ -143,23 +152,31 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: '80%',
   },
-  image: {
-    marginTop: 20,
-    width: '100%', // Make the image width responsive
-    height: undefined,
-    aspectRatio: 1, // Maintain aspect ratio
+  imageContainer: {
+    width: 500,
+    height: 500,
     borderRadius: 10,
-    borderColor: '#D1D5DB',
     borderWidth: 1,
+    borderColor: '#D1D5DB',
+    overflow: 'hidden',
+    marginTop: 20,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   textInput: {
     marginTop: 20,
     borderColor: '#D1D5DB',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 10,
+    padding: 20,
+    paddingBottom: 20,
     width: '80%',
   },
+  spaced: {
+    padding: 20,
+  }
 });
 
 export default AppImageUpload;
