@@ -22,38 +22,11 @@ export type RootStackParamList = {
   SignUpScreen: undefined;
 };
 
-const linking = {
-  prefixes: ['http://localhost:8081'],
-  config: {
-    screens: {
-      SplashScreen: 'SplashScreen',
-      WebSplashScreen: 'WebSplashScreen',
-      WebImageUpload: 'WebImageUpload',
-      AppImageUpload: 'AppImageUpload',
-      DrawerNavigator: {
-        screens: {
-          Home: 'Home',
-          Upload: 'Upload',
-          Profile: {
-            screens: {
-              One: 'One',
-              Two: 'Two',
-            },
-          },
-        },
-      },
-      Modal: 'modal',
-      ViewUser: 'ViewUser',
-      SignUpScreen: 'SignUpScreen',
-    },
-  },
-};
-
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function RootStack() {
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer>
       <Stack.Navigator initialRouteName={Platform.OS === 'web' ? 'WebSplashScreen' : 'SplashScreen'}>
         <Stack.Screen
           name="SplashScreen"

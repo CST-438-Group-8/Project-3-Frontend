@@ -35,7 +35,7 @@ export default function DrawerNavigator({ navigation }: Props) {
         }}
       />
       <Drawer.Screen
-          name="Upload"
+          name="Image Upload"
           component={AppImageUpload}
           options={{
             drawerIcon: ({ size, color }) => (

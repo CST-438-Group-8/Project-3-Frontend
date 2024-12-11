@@ -19,20 +19,6 @@ export default function WebSplashScreen({ navigation }) {
     });
 
     useEffect(() => {
-        const checkStoredToken = async () => {
-            try {
-                const token = await AsyncStorage.getItem('userToken');
-                if (token) {
-                    handleUserAuthentication(token);
-                }
-            } catch (err) {
-                console.error('Error fetching token from storage:', err);
-            }
-        };
-        checkStoredToken();
-    }, []);
-
-    useEffect(() => {
         if (response?.type === 'success' && response.authentication) {
             const { accessToken } = response.authentication;
             AsyncStorage.setItem('userToken', accessToken) // Save token to AsyncStorage
@@ -48,6 +34,7 @@ export default function WebSplashScreen({ navigation }) {
             });
             const userInfo = await res.json();
             setEmail(userInfo.email); // Save the user's email using setEmail
+            navigation.navigate("SignUpScreen"); // Always navigate to the SignUp screen
         } catch (error) {
             Alert.alert('Error', 'Failed to fetch user information. Please try again.');
             console.error('Failed to fetch user email:', error);

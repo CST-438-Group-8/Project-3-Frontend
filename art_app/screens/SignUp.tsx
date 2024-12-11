@@ -58,10 +58,7 @@ export default function SignUpScreen({navigation}) {
       console.log(response.data);
       setUsername(response.data.User.username);
       setUserId(response.data.User.user_id)
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "DrawerNavigator", params: { screen: "Profile", params: { screen: "One" } } }],
-      });
+      navigation.navigate("DrawerNavigator", {screen: "Profile"});
     } catch(error) {
       // console.error('Error Creating User:',error);
       // username unavailable

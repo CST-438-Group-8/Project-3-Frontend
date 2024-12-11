@@ -8,10 +8,7 @@ export const handleLogout = async (AsyncStorage, setEmail, setUsername, Platform
     
   if (Platform.OS === 'web') {
     localStorage.removeItem('userToken'); // Clear token from localStorage
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "WebSplashScreen" }],
-    });
+    navigation.navigate('WebSplashScreen');
   } else {
     navigation.navigate('SplashScreen');
   }
