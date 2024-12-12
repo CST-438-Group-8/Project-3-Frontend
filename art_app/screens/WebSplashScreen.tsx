@@ -19,20 +19,6 @@ export default function WebSplashScreen({ navigation }) {
     });
 
     useEffect(() => {
-        const checkStoredToken = async () => {
-            try {
-                const token = await AsyncStorage.getItem('userToken');
-                if (token) {
-                    handleUserAuthentication(token);
-                }
-            } catch (err) {
-                console.error('Error fetching token from storage:', err);
-            }
-        };
-        checkStoredToken();
-    }, []);
-
-    useEffect(() => {
         if (response?.type === 'success' && response.authentication) {
             const { accessToken } = response.authentication;
             AsyncStorage.setItem('userToken', accessToken) // Save token to AsyncStorage

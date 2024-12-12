@@ -11,23 +11,27 @@ interface WebCommentsProps {
     imageUrl: string;
     postUser: string;
     postUsername: string;
+    postUser_id: number;
     caption: string;
     comments: string[];
     post_id: string;
     onAddComment: (comment: string) => Promise<void>;
     onLoadComments: () => Promise<void>;
+    onDelComment: (comment_id: number) => Promise<void>;
     onChange: () => void;
     update: () => Promise<void>;
 }
 
 const sampleImage = 'https://media.istockphoto.com/id/1222357475/vector/image-preview-icon-picture-placeholder-for-website-or-ui-ux-design-vector-illustration.jpg?s=2048x2048&w=is&k=20&c=CJLIU6nIISsrHLTVO04nxIH2zVaKbnUeUXp7PnpM2h4=';
 
-const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, postUser, postUsername, caption, comments, post_id, onAddComment, onLoadComments, onChange, update }) => {
-    const { email, username, userId } = useContext(UserContext);
+const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, postUser, postUsername, caption, comments, post_id, postUser_id, onAddComment, onLoadComments, onChange, update ,onDelComment}) => {
+    // const { email, username, userId } = useContext(UserContext);
+    const { email, setEmail, setUsername, userId, setViewingUser,setUserId } = useContext(UserContext);
     const [newComment, setNewComment] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [load, setLoading] = useState<boolean>(true);
     const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
+    const [activeDropdown, setActiveDropdown] = useState<number | null>(null); 
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editId, setEditId] = useState('');
     const [editCaption, setEditCaption] = useState('');
@@ -99,6 +103,19 @@ const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imag
         }
     };
 
+    const handleDeleteComment = async (commentId: number) => {
+        setIsSubmitting(true);
+        console.log(commentId);
+        try {
+            await delComment(commentId);
+            await onLoadComments();
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const openEditModal = () => {
         setEditModalVisible(true);
     }
@@ -109,6 +126,68 @@ const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imag
         openEditModal();
     }
 
+     const delComment = async(comment_id) => {
+    const options = {
+      method: 'DELETE',
+      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/delComment',
+      data: {
+        comment_id : comment_id,
+      }
+    };
+    try {
+      const response = await axios.request(options);
+      console.log(response.data);
+    } catch(error) {
+      console.log('Comment Deletion Error:',error);
+    }
+  };
+  const toggleDropdown = (index: number) => {
+    setActiveDropdown((prev) => (prev === index ? null : index)); // Toggle dropdown
+};
+
+const renderComments = ({ item, index }: { item: any; index: number }) => (
+    <View style={styles.commentContainer}>
+        <Text style={styles.commentText}>
+            <Text style={styles.bold}>{item.username ? item.username : "anonymous"}</Text>: {item.comment}
+        </Text>
+
+        <View style={styles.optionSection}>
+            {/* {userId === postUser_id && ( */}
+            {/* {userId === item.user_id || userId === postUser_id && ( */}
+            {(userId === item.user_id || userId === postUser_id) && (
+                <TouchableOpacity
+                    style={styles.dropdownButtonComment}
+                    onPress={() => toggleDropdown(index)} 
+                >
+                    <Text style={styles.dropdownButtonTextComment}>☰</Text>
+                </TouchableOpacity>
+            )}
+            {activeDropdown === index && ( 
+                <View style={styles.dropdownComments}>
+                    <TouchableOpacity
+                        key={1}
+                        style={styles.dropdownItemComment}
+                        // onPress={() => handleEditComment(item.comment_id)}
+                        onPress={() => handleDeleteComment(item.comment_id)}
+                        // onPress={handleDeleteComment}
+                    >
+                        {/* <Text>{'Edit'}</Text> */}
+                        <Text>{'Delete'}</Text>
+                    </TouchableOpacity>
+                    {/* <TouchableOpacity
+                        key={2}
+                        style={styles.dropdownItem}
+                        // onPress={handleDeleteComment(item.id)}
+                        onPress={() => handleDeleteComment(item.comment_id)}
+                    >
+                        <Text>{'Delete'}</Text>
+                    </TouchableOpacity> */}
+                </View>
+            )}
+        </View>
+        
+    </View>
+);
     return (
         <Modal
             visible={visible}
@@ -169,14 +248,10 @@ const WebCommentsProfile: React.FC<WebCommentsProps> = ({ visible, onClose, imag
                         {load ? (
                         <ActivityIndicator size="large" color="#0f0f0f" />
                         ) : (
-                        <FlatList
+                            <FlatList
                             data={comments}
                             keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item }) => (
-                            <Text style={styles.commentText}>
-                                <Text style={styles.bold}>{item.username || 'anonymous'}</Text>: {item.comment}
-                            </Text>
-                            )}
+                            renderItem={renderComments}
                         />
                         )}
 
@@ -355,6 +430,53 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     bold: {
+        fontWeight: 'bold',
+    },
+    commentContainer:{
+        // position : 'absolute',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '80%',
+        // justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
+    optionSection: {
+        // width: '50%',
+        alignItems: 'center',
+        // padding: 10,
+        // backgroundColor: theme.colors.primary,
+    },
+    dropdownButtonComment: {
+        color: 'red',
+        position: 'absolute',
+        top: 0,
+        left: -15,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        padding: 2,
+        borderRadius: 2,
+        zIndex: 2,
+    },
+    dropdownComments: {
+        position: 'absolute',
+        top: 0,
+        left: 10,
+        backgroundColor: 'white',
+        borderRadius: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 3,
+        zIndex: 2,
+    },
+    dropdownItemComment: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    dropdownButtonTextComment: {
+        color: 'red',
+        fontSize: 10,
         fontWeight: 'bold',
     },
 });  

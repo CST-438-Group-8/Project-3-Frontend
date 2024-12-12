@@ -1,25 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useContext} from 'react';
 import { Modal, View, Text, TextInput, Image, TouchableOpacity, StyleSheet, FlatList, GestureResponderEvent, ActivityIndicator } from 'react-native';
 import { theme } from '../components/theme';
-
+import { Ionicons } from '@expo/vector-icons';
+import { UserContext } from '../components/UserInfo';
 interface WebCommentsProps {
     visible: boolean;
     onClose: (event?: GestureResponderEvent) => void;
     imageUrl: string;
     postUser: string;
+    postUser_id: number;
     caption: string;
     comments: string[];
     onAddComment: (comment: string) => Promise<void>;
     onLoadComments: () => Promise<void>;
+    onDelComment: (comment_id: number) => Promise<void>;
+    onEditComment: (comment_id: number) => Promise<void>;
 }
 
 const sampleImage = 'https://media.istockphoto.com/id/1222357475/vector/image-preview-icon-picture-placeholder-for-website-or-ui-ux-design-vector-illustration.jpg?s=2048x2048&w=is&k=20&c=CJLIU6nIISsrHLTVO04nxIH2zVaKbnUeUXp7PnpM2h4=';
-
-const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, postUser , caption, comments, onAddComment, onLoadComments}) => {
+const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, postUser_id, imageUrl, postUser , caption, comments, onAddComment, onLoadComments, onDelComment, onEditComment}) => {
     const [newComment, setNewComment] = useState<string>('');
+    const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
+    const [activeDropdown, setActiveDropdown] = useState<number | null>(null); 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [load, setLoading] = useState<boolean>(true);
-
+    const { email, setEmail, setUsername, userId, setViewingUser,setUserId } = useContext(UserContext);
     useEffect(() => {
         if (visible) {
             try {
@@ -30,7 +35,9 @@ const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, p
             } finally {
                 setLoading(false); // Set loading state after fetch attempt
             }
-            
+            console.log("THIS WHAT U NEED TO SEE MAN");
+            console.log(userId);
+            console.log(postUser_id);
         }
     }, [visible]);
 
@@ -48,11 +55,86 @@ const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, p
         }
     };
 
-    const renderComments = ({item}) => (
+    const handleDeleteComment = async (commentId: number) => {
+        setIsSubmitting(true);
+        console.log(commentId);
+        try {
+            await onDelComment(commentId);
+            await onLoadComments();
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+        
+    // const handleEditComment = async (commentId: number) => {
+    //     if (!newComment.trim()) return; 
+    //     setIsSubmitting(true);
+    //     try {
+    //         await onEditComment(commentId); //change
+    //         // setNewComment('');
+    //         await onLoadComments();
+    //     } catch (error) {
+    //         console.error('Error updating comment:', error);
+    //     } finally {
+    //         setIsSubmitting(false);
+    //     }
+    // };
+    
+
+
+
+//right here
+
+const toggleDropdown = (index: number) => {
+    setActiveDropdown((prev) => (prev === index ? null : index)); // Toggle dropdown
+};
+
+const renderComments = ({ item, index }: { item: any; index: number }) => (
+    <View style={styles.commentContainer}>
         <Text style={styles.commentText}>
-            <Text style={styles.bold}>{item.username ? item.username: "anonymous" }</Text>: {item.comment}
+            <Text style={styles.bold}>{item.username ? item.username : "anonymous"}</Text>: {item.comment}
         </Text>
-    );
+
+        <View style={styles.optionSection}>
+            {/* {userId === postUser_id && ( */}
+            {/* {userId === item.user_id || userId === postUser_id && ( */}
+            {(userId === item.user_id || userId === postUser_id) && (
+                <TouchableOpacity
+                    style={styles.dropdownButton}
+                    onPress={() => toggleDropdown(index)} 
+                >
+                    <Text style={styles.dropdownButtonText}>☰</Text>
+                </TouchableOpacity>
+            )}
+            {activeDropdown === index && ( 
+                <View style={styles.dropdown}>
+                    <TouchableOpacity
+                        key={1}
+                        style={styles.dropdownItem}
+                        // onPress={() => handleEditComment(item.comment_id)}
+                        onPress={() => handleDeleteComment(item.comment_id)}
+                        // onPress={handleDeleteComment}
+                    >
+                        {/* <Text>{'Edit'}</Text> */}
+                        <Text>{'Delete'}</Text>
+                    </TouchableOpacity>
+                    {/* <TouchableOpacity
+                        key={2}
+                        style={styles.dropdownItem}
+                        // onPress={handleDeleteComment(item.id)}
+                        onPress={() => handleDeleteComment(item.comment_id)}
+                    >
+                        <Text>{'Delete'}</Text>
+                    </TouchableOpacity> */}
+                </View>
+            )}
+        </View>
+        
+    </View>
+);
 
     const renderCaption = ({item}) => (
         <Text style={styles.captionText}>
@@ -86,9 +168,12 @@ const WebComments: React.FC<WebCommentsProps> = ({ visible, onClose, imageUrl, p
                         <Text style={[styles.bold, { margin: 10 }]}></Text>
 
                         <Text style={styles.commentTitle}>Comments</Text>
+
                         <Text style={styles.commentText}>
-                            {/* <Text style={styles.bold}>{postUser ? postUser: "anonymous" }</Text>: {caption} */}
+                
                         </Text>
+
+                        
 
                         {load ? (
                             <ActivityIndicator size="large" color="#0f0f0f" />
@@ -213,6 +298,17 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
     },
+    delButton: {
+        // backgroundColor: '#2196F3',
+        backgroundColor: 'red',
+        padding: 5,
+        borderRadius: 2,
+        alignItems: 'center',
+    },
+    delButtonText: {
+        color: 'red',
+        fontWeight: 'bold',
+    },
     closeButton: {
             position: 'absolute',
             top: 20,
@@ -228,6 +324,53 @@ const styles = StyleSheet.create({
     },
     bold: {
         fontWeight: 'bold',
+    },
+    commentContainer:{
+        // position : 'absolute',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '80%',
+        // justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
+    dropdownButtonText: {
+        color: 'red',
+        fontSize: 10,
+        fontWeight: 'bold',
+    },
+    dropdownButton: {
+        color: 'red',
+        position: 'absolute',
+        top: 0,
+        left: -15,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        padding: 2,
+        borderRadius: 2,
+        zIndex: 2,
+    },
+    optionSection: {
+        // width: '50%',
+        alignItems: 'center',
+        // padding: 10,
+        // backgroundColor: theme.colors.primary,
+    },
+    dropdown: {
+        position: 'absolute',
+        top: 0,
+        left: 10,
+        backgroundColor: 'white',
+        borderRadius: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 3,
+        zIndex: 2,
+    },
+    dropdownItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
     },
 });  
 
