@@ -34,12 +34,10 @@ export default function WebSplashScreen({ navigation }) {
             });
             const userInfo = await res.json();
             setEmail(userInfo.email); // Save the user's email using setEmail
-
             navigation.reset({
                 index: 0,
                 routes: [{ name: "SignUpScreen" }],
               });
-
         } catch (error) {
             Alert.alert('Error', 'Failed to fetch user information. Please try again.');
             console.error('Failed to fetch user email:', error);
