@@ -6,10 +6,11 @@ import { theme } from '../components/theme';
 import { viewUserProfile } from '../components/NavigationFunctions';
 import WebComments from '../components/WebComments';
 import MobileComments from '../components/MobileComments';
+import { UserInfo } from '../components/UserInfo';
 import axios from 'axios';
 
 const Home = ({ navigation }) => {
-  const { email, setEmail, setUsername, userId, setViewingUser } = useContext(UserContext);
+  const { email, setEmail, setUsername, userId, setViewingUser,setUserId } = useContext(UserContext);
   const { width } = useWindowDimensions();
   const [webModalVisible, setWebModalVisible] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
@@ -20,6 +21,8 @@ const Home = ({ navigation }) => {
   const [load, setLoad] = useState(true);
   const [posts, setPosts] = useState([]);
   const [comments, setComments] = useState([]);
+
+  
 
   const sampleImage = 'https://media.istockphoto.com/id/1222357475/vector/image-preview-icon-picture-placeholder-for-website-or-ui-ux-design-vector-illustration.jpg?s=2048x2048&w=is&k=20&c=CJLIU6nIISsrHLTVO04nxIH2zVaKbnUeUXp7PnpM2h4=';
 
@@ -64,6 +67,44 @@ const Home = ({ navigation }) => {
       console.log('Comment Error:',error);
     }
   }
+
+  const delComment = async(comment_id) => {
+    const options = {
+      method: 'DELETE',
+      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/delComment',
+      data: {
+        comment_id : comment_id,
+      }
+    };
+    try {
+      const response = await axios.request(options);
+      console.log(response.data);
+    } catch(error) {
+      console.log('Comment Deletion Error:',error);
+    }
+  };
+
+  const editComment = async(comment_id) => {
+    const options = {
+      method: 'PATCH',
+      url: 'https://group8-project3-09c9182c5047.herokuapp.com/comments/editComment',
+      data: {
+        comment_id : comment_id,
+      }
+    };
+    try {
+      const response = await axios.request(options);
+      console.log(response.data);
+    } catch(error) {
+      console.log('Comment Update Error:',error);
+    }
+  };
+
+
+
+
+
+
 
   const getPostComments = async() => {
     // https://group8-project3-09c9182c5047.herokuapp.com/comments/userComments
@@ -155,7 +196,10 @@ const Home = ({ navigation }) => {
         caption={postInfo.caption}
         postUser={postInfo.username}
         comments={comments}
+        postUser_id = {postInfo.user_id} //this here is no here
+        onDelComment = {delComment}
         onAddComment={addComment}
+        onEditComment= {editComment}
         onLoadComments={getPostComments}
       />
 
